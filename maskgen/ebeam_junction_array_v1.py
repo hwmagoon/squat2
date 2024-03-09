@@ -39,23 +39,16 @@ eb_align_dim    = 40   ## [float] side length of ebeam alignment squares
 eb_align_offset = 480  ## [float] distance between ebeam marker and side of the chip
 
 
-## Witness junctions
-witness_jj_gaps = [0, 0.22, 0.22, 0.22, 0.23, 0.24]
-witness_pad_layers = [layer_opt_al, layer_opt_nb]    ## [list of layers] Each material gets its own column of test JJs
-witness_pad_mult = 1.25                              ## [float] Make test pads bigger so that probing is easier
-witness_separation = eb_align_offset                 ## [float] Vertical separation of witness jjs
-
-
 ## Parameters for individual SQUATs
-qpad_x = 110
-qpad_y = 110
-qpad_angle = 7*math.pi/8
-qpad_separation = 800
-qpad_gnd_cutout_mult = [1.2, 3]
+qpad_x = 110                 ## [float]  x radius of SQUAT fins (i.e. x direction fin length)
+qpad_y = 110                 ## [float]  y radius of SQUAT fins
+qpad_angle = 7*math.pi/8     ## [float]  angle of sector carved out by SQUAT fin
+qpad_separation = 800        ## [float]  distance in center between fins (i.e. length of junction structure)
+qpad_gnd_cutout_mult = [1.2, 3]    ## [2 item list] multipliers for ground plane cutout oval. List contains [x mult, y mult]
 
 
 ## Array parameters
-qpad_array_spacing_mult = 0.7 ## Times the width of each array feature
+qpad_array_spacing_mult = 0.7 ## [float] Spacing between elements = (this multiplier) * (the width of each array feature)
 
 jj_gaps = np.array([
     [0.10, 0.15, 0.20, 0.25],
@@ -208,6 +201,7 @@ if gnd_plane:
     cell_chip.add(gnd_plane)
 
 
+## Add cells to top cell
 cell_chip.add(cell_junc)
 cell_chip.add(cell_fins)
 
