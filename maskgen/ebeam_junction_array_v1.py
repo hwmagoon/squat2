@@ -43,7 +43,7 @@ eb_align_offset = 480  ## [float] distance between ebeam marker and side of the 
 qpad_x = 110                 ## [float]  x radius of SQUAT fins (i.e. x direction fin length)
 qpad_y = 110                 ## [float]  y radius of SQUAT fins
 qpad_angle = 7*math.pi/8     ## [float]  angle of sector carved out by SQUAT fin
-qpad_separation = 800        ## [float]  distance in center between fins (i.e. length of junction structure)
+qpad_separation = 600        ## [float]  distance in center between fins (i.e. length of junction structure)
 qpad_gnd_cutout_mult = [1.2, 3]    ## [2 item list] multipliers for ground plane cutout oval. List contains [x mult, y mult]
 
 
@@ -64,6 +64,14 @@ jj_finger_widths = np.array([
     [0.14, 0.14, 0.14, 0.14]
 ])
 
+
+## Row of dose test SQUATS at bottom.  Will do different ebeam doses to each set of probe pads
+##   each jj will be the same (using the following finger width and gap)
+##   but I'll use this as a dose test for probe pads
+cal_jj_finger_width = 0.18
+cal_jj_gap = 0.15
+ndoses = 5
+cal_qpad_separation = 10
 
 
 ####------------------------------------------------------####
@@ -174,7 +182,7 @@ for col in range(0, ncols):
         cell_fins.add(qpads) #, jpads, und])
         cell_junc.add(jpads)
         cell_junc.add(und)
-        ## Mae cutout for junction in ground plane
+        ## Make cutout for junction in ground plane
         qpad_gnd_cutout = gdspy.Round(center=loc, radius=(qpad_gnd_cutout_radius), **layer_opt_nb)
         cell_gnd_neg.add(qpad_gnd_cutout)
         ## Update x location
@@ -184,8 +192,43 @@ for col in range(0, ncols):
 
 
 ####------------------------------------------------------####
-####              Tag bottom with text                    ####
+####         Calibration Array along bottom               ####
 ####------------------------------------------------------####
+    
+
+## Figure out starting position and spacing
+feature_array_space = 2*qpad_x
+if ndoses%2 == 0:
+    print("Number of dose tests is even")
+    xpos_start = chip_center[0] - feature_array_space*(ndoses+2)/2
+else:
+    print("Number of dose tests is odd")
+    xpos_start = chip_center[1] - feature_array_space*(ndoses+1)/2
+xpos = xpos_start
+ypos = 4*eb_align_offset
+
+## Make a new layer for each set of pads
+pad_dose_layer = {"layer": 5, "datatype": 0}
+
+## Make a row of the same feature, each with pads in a new layer
+for i in range(0, ndoses):
+    loc = [xpos, ypos]
+    qpads, jpads, und = squat_from_center_pt(loc=loc, 
+                                        qpad_x=qpad_x, qpad_y=qpad_y, 
+                                        qpad_angle=qpad_angle, qpad_separation=cal_qpad_separation, 
+                                        fillet_radius=fillet_r_small, 
+                                        jj_gap=cal_jj_gap, jj_finger_width=cal_jj_finger_width, 
+                                        pad_layer=pad_dose_layer, pin_layer=layer_eb_pin, under_layer=layer_eb_under)
+    ## Add junctions to cells
+    cell_fins.add(qpads)
+    cell_junc.add(jpads)
+    cell_junc.add(und)
+    ## Make cutout in ground plane
+    qpad_gnd_cutout = gdspy.Round(center=loc, radius=1.5*qpad_x, **layer_opt_nb)
+    cell_gnd_neg.add(qpad_gnd_cutout)
+    ## Update position and pad layer
+    xpos += 2*feature_array_space
+    pad_dose_layer['layer'] += 1
 
 
 
