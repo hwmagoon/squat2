@@ -14,7 +14,7 @@ from squatHelperLib import *
 ####                   Parameters                         ####
 ####------------------------------------------------------####
 
-filepath = "../GDS/V4_masks/20240318_ebeam_only_junction_array.gds"
+filepath = "../GDS/V4_masks/20240320_ebeam_only_junction_array_v3.gds"
 
 ## GDS Layers
 layer_chip     = {"layer": 0, "datatype": 0}
@@ -43,7 +43,7 @@ eb_align_offset = 480  ## [float] distance between ebeam marker and side of the 
 qpad_x = 110                 ## [float]  x radius of SQUAT fins (i.e. x direction fin length)
 qpad_y = 110                 ## [float]  y radius of SQUAT fins
 qpad_angle = 7*math.pi/8     ## [float]  angle of sector carved out by SQUAT fin
-qpad_separation = 600        ## [float]  distance in center between fins (i.e. length of junction structure)
+qpad_separation = 200        ## [float]  distance in center between fins (i.e. length of junction structure)
 qpad_gnd_cutout_mult = [1.2, 3]    ## [2 item list] multipliers for ground plane cutout oval. List contains [x mult, y mult]
 
 
@@ -53,8 +53,8 @@ qpad_array_spacing_mult = 0.7 ## [float] Spacing between elements = (this multip
 jj_gaps = np.array([
     [0.10, 0.15, 0.20, 0.25],
     [0.10, 0.15, 0.20, 0.25],
-    [0.10, 0.15, 0.20, 0.25],
-    [0.10, 0.15, 0.20, 0.25]
+    [0.10, 0.15, 0.20, 0.00],
+    [0.10, 0.15, 0.20, 0.00]
 ])
 
 jj_finger_widths = np.array([
@@ -71,7 +71,7 @@ jj_finger_widths = np.array([
 cal_jj_finger_width = 0.18
 cal_jj_gap = 0.15
 ndoses = 5
-cal_qpad_separation = 10
+cal_qpad_separation = 100
 
 
 ####------------------------------------------------------####
@@ -224,7 +224,7 @@ for i in range(0, ndoses):
     cell_junc.add(jpads)
     cell_junc.add(und)
     ## Make cutout in ground plane
-    qpad_gnd_cutout = gdspy.Round(center=loc, radius=1.5*qpad_x, **layer_opt_nb)
+    qpad_gnd_cutout = gdspy.Round(center=loc, radius=2*qpad_x, **layer_opt_nb)
     cell_gnd_neg.add(qpad_gnd_cutout)
     ## Update position and pad layer
     xpos += 2*feature_array_space
