@@ -14,7 +14,7 @@ from squatHelperLib import *
 ####                   Parameters                         ####
 ####------------------------------------------------------####
 
-filepath = "../GDS/V4_masks/20240320_ebeam_only_junction_array_v3.gds"
+filepath = "../GDS/V4_masks/20240401_ebeam_only_junction_array_v5.gds"
 
 ## GDS Layers
 layer_chip     = {"layer": 0, "datatype": 0}
