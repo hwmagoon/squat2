@@ -272,7 +272,7 @@ def checkerboard(loc, width, num, layer):
 import datetime
 now = datetime.datetime.now()
 
-name = "ion_mill_mask_v2_time"
+name = "ion_mill_mask_v100_time"
 name = name.replace("time", now.strftime("%Y%m%d-%H%M%S"))
 filepath = f"./GDS/ion_mill/{name}.gds"
 
@@ -313,7 +313,7 @@ N_island = 8
 len_island = 25
 width_island = len_island
 sep_island = 20
-redundancy = 5      ## [int] number of redundant junctions to make 
+redundancy = 1      ## [int] number of redundant junctions to make 
 
 ## Array parameters
 # qpad_array_spacing_mult = 0.7 ## [float] Spacing between elements = (this multiplier) * (the width of each array feature)
@@ -332,9 +332,9 @@ redundancy = 5      ## [int] number of redundant junctions to make
 #     [0.14, 0.14, 0.14, 0.14]
 # ])
 
-overlaps = np.linspace(4.0, 22.0, 3)
-N_depths = [1,2,5]
-N_widths = [1,2,5]
+overlaps = [20]
+N_depths = [80]
+N_widths = [45]
 
 
 ## Row of dose test SQUATS at bottom.  Will do different ebeam doses to each set of probe pads
@@ -449,9 +449,7 @@ cell_probes.add([plus_tr_2, plus_tl_2, plus_br_2, plus_bl_2])
 chip_center = [chip_x/2, chip_y/2]
 # qpad_gnd_cutout_radius = np.array([qpad_spacing_mult[0]*(qpad_x+qpad_separation/2), qpad_spacing_mult[1]*(qpad_y)])
 # feature_array_space = 2*qpad_gnd_cutout_radius*qpad_array_spacing_mult
-center_vals = np.array([(chip_x/4, chip_y/4),
-                        (0.58*chip_x, chip_y/4),
-                        (0.38*chip_x, 0.65*chip_y)])
+center_vals = np.array([(chip_x/2, 0.95*chip_y/2)])
 
 
 # ## Figure out placement on chip
@@ -495,69 +493,66 @@ center_vals = np.array([(chip_x/4, chip_y/4),
 #     ypos -= 2*feature_array_space[1]
 
 
-# add text in center of chip
-text = gdspy.Text(name, size=100, position=(0.40*chip_x, 0.45*chip_y), layer=layer_al_oxide['layer'])
+# add text in bottom of chip
+text = gdspy.Text(name, size=100, position=(0.40*chip_x, 0.05*chip_y), layer=layer_al_oxide['layer'])
 cell_islands.add(text)
 
-## Make material test clovers
-clover1, cloverCirc1 = structures.cloverleaf(center = [0.320*chip_x, 0.46*chip_y], D=clover_size, clover_layer=layer_al_oxide['layer'], circ_layer=layer_al_oxide['layer'])
-cell_chip.add([clover1])
+# ## Make material test clovers
+# clover1, cloverCirc1 = structures.cloverleaf(center = [0.320*chip_x, 0.46*chip_y], D=clover_size, clover_layer=layer_al_oxide['layer'], circ_layer=layer_al_oxide['layer'])
+# cell_chip.add([clover1])
 
-# add checkerboard pattern
-num_squares = 10
-width_square = 20 # width of each square (in um)
-checkerboard_1 = checkerboard([0.355*chip_x, 0.45*chip_y], width_square, num_squares, layer_al_oxide)
-cell_islands.add(checkerboard_1)
+# # add checkerboard pattern
+# num_squares = 10
+# width_square = 20 # width of each square (in um)
+# checkerboard_1 = checkerboard([0.355*chip_x, 0.45*chip_y], width_square, num_squares, layer_al_oxide)
+# cell_islands.add(checkerboard_1)
 
-# add checkerboard pattern
-num_squares = 10
-width_square = 10 # width of each square (in um)
-checkerboard_1 = checkerboard([0.380*chip_x, 0.45*chip_y], width_square, num_squares, layer_al_oxide)
-cell_islands.add(checkerboard_1)
+# # add checkerboard pattern
+# num_squares = 10
+# width_square = 10 # width of each square (in um)
+# checkerboard_1 = checkerboard([0.380*chip_x, 0.45*chip_y], width_square, num_squares, layer_al_oxide)
+# cell_islands.add(checkerboard_1)
 
-# add smaller checkerboard pattern
-num_squares = 10
-width_square = 4 # width of each square (in um)
-checkerboard_2 = checkerboard([0.392*chip_x, 0.45*chip_y], width_square, num_squares, layer_al_oxide)
-cell_islands.add(checkerboard_2)
+# # add smaller checkerboard pattern
+# num_squares = 10
+# width_square = 4 # width of each square (in um)
+# checkerboard_2 = checkerboard([0.392*chip_x, 0.45*chip_y], width_square, num_squares, layer_al_oxide)
+# cell_islands.add(checkerboard_2)
 
-# add tiny checkerboard pattern
-num_squares = 10
-width_square = 1 # width of each square (in um)
-checkerboard_3 = checkerboard([0.398*chip_x, 0.45*chip_y], width_square, num_squares, layer_al_oxide)
-cell_islands.add(checkerboard_3)
-
-
-# add same checkerboard patterns to the right of the clover on layer_al_pad
-num_squares = 10
-width_square = 1 # width of each square (in um)
-checkerboard_1 = checkerboard([0.69*chip_x, 0.45*chip_y], width_square, num_squares, layer_al_pad)
-cell_probes.add(checkerboard_1)
-
-# add checkerboard pattern
-num_squares = 10
-width_square = 4 # width of each square (in um)
-checkerboard_1 = checkerboard([0.696*chip_x, 0.45*chip_y], width_square, num_squares, layer_al_pad)
-cell_probes.add(checkerboard_1)
-
-# add checkerboard pattern
-num_squares = 10
-width_square = 10 # width of each square (in um)
-checkerboard_1 = checkerboard([0.708*chip_x, 0.45*chip_y], width_square, num_squares, layer_al_pad)
-cell_probes.add(checkerboard_1)
-
-# add checkerboard pattern
-num_squares = 10
-width_square = 20 # width of each square (in um)
-checkerboard_1 = checkerboard([0.733*chip_x, 0.45*chip_y], width_square, num_squares, layer_al_pad)
-cell_probes.add(checkerboard_1)
-
-# make clover on layer_al_pad
-clover1, cloverCirc1 = structures.cloverleaf(center = [0.79*chip_x, 0.46*chip_y], D=clover_size, clover_layer=layer_al_pad['layer'], circ_layer=layer_al_pad['layer'])
-cell_probes.add([clover1])
+# # add tiny checkerboard pattern
+# num_squares = 10
+# width_square = 1 # width of each square (in um)
+# checkerboard_3 = checkerboard([0.398*chip_x, 0.45*chip_y], width_square, num_squares, layer_al_oxide)
+# cell_islands.add(checkerboard_3)
 
 
+# # add same checkerboard patterns to the right of the clover on layer_al_pad
+# num_squares = 10
+# width_square = 1 # width of each square (in um)
+# checkerboard_1 = checkerboard([0.69*chip_x, 0.45*chip_y], width_square, num_squares, layer_al_pad)
+# cell_probes.add(checkerboard_1)
 
+# # add checkerboard pattern
+# num_squares = 10
+# width_square = 4 # width of each square (in um)
+# checkerboard_1 = checkerboard([0.696*chip_x, 0.45*chip_y], width_square, num_squares, layer_al_pad)
+# cell_probes.add(checkerboard_1)
+
+# # add checkerboard pattern
+# num_squares = 10
+# width_square = 10 # width of each square (in um)
+# checkerboard_1 = checkerboard([0.708*chip_x, 0.45*chip_y], width_square, num_squares, layer_al_pad)
+# cell_probes.add(checkerboard_1)
+
+# # add checkerboard pattern
+# num_squares = 10
+# width_square = 20 # width of each square (in um)
+# checkerboard_1 = checkerboard([0.733*chip_x, 0.45*chip_y], width_square, num_squares, layer_al_pad)
+# cell_probes.add(checkerboard_1)
+
+# # make clover on layer_al_pad
+# clover1, cloverCirc1 = structures.cloverleaf(center = [0.79*chip_x, 0.46*chip_y], D=clover_size, clover_layer=layer_al_pad['layer'], circ_layer=layer_al_pad['layer'])
+# cell_probes.add([clover1])
 
 
 
@@ -586,7 +581,7 @@ for i, N_width in enumerate(N_widths):
     
     for overlap in overlaps:
         for _ in range(redundancy):
-            loc = [xpos, ypos]
+            loc = [0.47*chip_x, 0.95*chip_y]
             ## Make junction
             qpads, islands, between = oxide_ion_mill_refactor(loc=loc, 
                                     qpad_x=qpad_x, qpad_y=qpad_y, 
@@ -605,27 +600,27 @@ for i, N_width in enumerate(N_widths):
         ypos -= 2*feature_array_space[1]
 
 
-# add shorted row of pads (N=0) for comparison below existing structures
-N = 0
-overlap = 20
-[xpos, ypos] = (0.23*chip_x, 0.425*chip_y)
-feature_array_space = (200, 0)
-for _ in range(redundancy*3):
-    loc = [xpos, ypos]
-    ## Make junction
-    qpads, _, between = oxide_ion_mill_from_lhs_pt(loc=loc, 
-                            qpad_x=qpad_x, qpad_y=qpad_y, 
-                            qpad_angle=qpad_angle, oxide_overlap=overlap,
-                            N_island=N, len_island=len_island, width_island=width_island,
-                            sep_island=sep_island, fillet_radius=fillet_r_small,
-                            pad_layer=layer_al_pad, oxide_layer=layer_al_oxide)
-    cell_probes.add(qpads)
-    cell_probes.add(between)
+# # add shorted row of pads (N=0) for comparison below existing structures
+# N = 0
+# overlap = 20
+# [xpos, ypos] = (0.23*chip_x, 0.425*chip_y)
+# feature_array_space = (200, 0)
+# for _ in range(redundancy*3):
+#     loc = [xpos, ypos]
+#     ## Make junction
+#     qpads, _, between = oxide_ion_mill_from_lhs_pt(loc=loc, 
+#                             qpad_x=qpad_x, qpad_y=qpad_y, 
+#                             qpad_angle=qpad_angle, oxide_overlap=overlap,
+#                             N_island=N, len_island=len_island, width_island=width_island,
+#                             sep_island=sep_island, fillet_radius=fillet_r_small,
+#                             pad_layer=layer_al_pad, oxide_layer=layer_al_oxide)
+#     cell_probes.add(qpads)
+#     cell_probes.add(between)
 
-    # cell_islands.add(islands)
+#     # cell_islands.add(islands)
 
-    ## Update x location
-    xpos += 2*feature_array_space[0]
+#     ## Update x location
+#     xpos += 2*feature_array_space[0]
 
 ####------------------------------------------------------####
 ####         Calibration Array along bottom               ####
