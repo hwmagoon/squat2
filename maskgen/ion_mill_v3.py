@@ -558,11 +558,17 @@ center_vals = np.array([(0.22*chip_x, 0.28*chip_y),
 
 # cell_probes.add(polygons)
 
+print("Adding slab logo")
 loc_slab = [0.14*chip_x, 0.42*chip_y]
 add_gds_to_cell(cell_probes, "./slab_logo.gds", loc_slab, scale=1.0)
 
+# print("Adding lewis")
 # loc_lewis = [0.92*chip_x, 0.92*chip_y]
 # add_gds_to_cell(cell_probes, "./lewis.gds", loc_lewis, scale=1.0)
+
+print("Adding stanford logo")
+loc_stanford = [0.85*chip_x, 0.6*chip_y]
+add_gds_to_cell(cell_probes, "./stanford.gds", loc_stanford, scale=1.0)
 
 # add text in center of chip
 text = gdspy.Text(name, size=100, position=(0.40*chip_x, 0.45*chip_y), layer=layer_al_oxide['layer'])
