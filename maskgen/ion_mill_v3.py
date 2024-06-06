@@ -2,9 +2,24 @@
 
 import gdspy
 import math
+
+import gdspy.polygon
 import structuresLib as structures
 from squatHelperLib import *
 from picture_test import img_to_gds
+
+def add_gds_to_cell(cell, gds_file, loc, scale=1.0):
+    library = gdspy.GdsLibrary(infile=gds_file)
+    cell_gds = library.top_level()[0]
+    polygons = cell_gds.get_polygonsets()
+
+    for polygon in polygons:
+        polygon.scale(scale)
+        polygon.translate(*loc)
+
+    cell.add(polygons)
+
+    return polygons
 
 def oxide_ion_mill_from_lhs_pt(loc, qpad_x, qpad_y, qpad_angle, oxide_overlap, N_island, len_island, width_island, sep_island,  fillet_radius,
                          pad_layer, oxide_layer):
@@ -527,12 +542,27 @@ center_vals = np.array([(0.22*chip_x, 0.28*chip_y),
 ## add image
 
 # add image to the right of the clover on layer_al_pad
-image_size = 1
-image = img_to_gds(f"./slab-logo-high-res.png", image_size, layer = layer_al_oxide, isDither=False, loc=[0.08*chip_x, 0.38*chip_y])
+# image_size = 1
+# image = img_to_gds(f"./slab-logo-high-res.png", image_size, layer = layer_al_oxide, isDither=False, loc=[0.08*chip_x, 0.38*chip_y])
 
 # print(image)
 
-cell_islands.add(image)
+# location = [0.14*chip_x, 0.42*chip_y]
+# library = gdspy.GdsLibrary(infile="./slab_logo.gds")
+# cell = library.top_level()[0]
+# polygons = cell.get_polygonsets()
+
+# # translate the polygons to the correct location
+# for polygon in polygons:
+#     polygon.translate(*location)
+
+# cell_probes.add(polygons)
+
+loc_slab = [0.14*chip_x, 0.42*chip_y]
+add_gds_to_cell(cell_probes, "./slab_logo.gds", loc_slab, scale=1.0)
+
+# loc_lewis = [0.92*chip_x, 0.92*chip_y]
+# add_gds_to_cell(cell_probes, "./lewis.gds", loc_lewis, scale=1.0)
 
 # add text in center of chip
 text = gdspy.Text(name, size=100, position=(0.40*chip_x, 0.45*chip_y), layer=layer_al_oxide['layer'])
