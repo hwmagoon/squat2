@@ -3,6 +3,8 @@ import gdspy
 import numpy as np
 import math
 import structuresLib as structures
+from skimage import io, color, measure, morphology
+
 
 
 def squat_from_center_pt(loc, qpad_x, qpad_y, qpad_angle, qpad_separation, fillet_radius, 
@@ -122,3 +124,31 @@ def squat_from_lhs_pt(loc, qpad_x, qpad_y, qpad_angle, qpad_separation, fillet_r
 
 
       return [qpad1, qpad2], [dolan], [dolan_und]
+
+
+def import_cell_from_gds(file_path, cell_name, target_cell, position):
+    """
+    Imports a cell from a GDS file and places it at the specified position in the target cell.
+
+    Parameters:
+    - file_path: str, path to the GDS file containing the cell to import.
+    - cell_name: str, name of the cell to import.
+    - target_cell: gdspy.Cell, the cell to which the imported cell will be added.
+    - position: tuple of float, (x, y) coordinates where the imported cell will be placed.
+
+    Returns:
+    - target_cell: gdspy.Cell, the target cell with the imported cell added.
+    """
+    # Read the GDS file
+    imported_gds = gdspy.GdsLibrary(infile=file_path)
+
+    # Get the cell from the imported GDS
+    imported_cell = imported_gds.cells[cell_name]
+
+    # Create a reference to the imported cell
+    cell_reference = gdspy.CellReference(imported_cell, origin=position)
+
+    # Add the cell reference to the target cell
+    target_cell.add(cell_reference)
+
+    return target_cell
