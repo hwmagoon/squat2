@@ -163,6 +163,104 @@ def dolan(start = (0,0), end = (10,0), fingerWidth = 0.15, gap = 0.22, lineWidth
     shadow = gdspy.boolean(shadow, dolan, 'not', layer=layerShadow)
     return dolan, shadow
 
+"""
+[RJC] - Junction circular pads w/ undercut shadow layer
+These are the small pads that either Manhattan or Dolan junctions connect to
+Inputs:
+  center1, center2    coordinates of pad centers
+  r                   radius of pads
+  shadowWidth         thickness of shadow offset from THRU cut
+  layerMetal           THRU cut layer
+  layerShadow         undercut/shadow layer
+Output:
+  (pads, shadow)      (polygon w/ pads layer, 
+                      polygon w/ shadow layer)
+"""
+def jxnCircPadsAndShdw(center1 = [0,0], center2 = [10,10], r = 2, shadowWidth = 0.2, layerMetal = 0, layerShadow = 1):
+    jxnpad1 = gdspy.Round(center1, r)
+    jxnpad2 = gdspy.Round(center2, r)
+    jxnPads = gdspy.boolean(jxnpad1, jxnpad2, 'or', layer = layerMetal)
+    
+    ## [RJC] make shadow
+    shadow = gdspy.offset(jxnPads, shadowWidth)
+    
+    ## [RJC] remove shadow overlap with THRU layer to prevent double-exposure
+    shadow = gdspy.boolean(shadow, jxnPads, 'not', layer=layerShadow)
+
+    return jxnPads, shadow
+
+"""
+[RJC] - Dolan junction plus circular pads, both with undercut shadow layer
+These are the small pads that either Manhattan or Dolan junctions connect to
+Inputs:
+    start, end                  coordinates of L/R limits of jxn area
+    fingerWidth                 width of jxn finger
+    gap                         gap between finger tip and line
+    lineWidth                   width of lines approaching jxn
+    taperLength                 length of triangle that tapers to jxn finger
+    fingerLength                length of jxn finger
+    shadowWidth                 thickness of shadow offset from metal
+    padRadius                   radius of pads
+    layerMetal                  metal layer
+    layerShadow                 shadow layer
+Output:
+  (dolan, shadow)      (polygon w/ dolan and pads layer, 
+                      polygon w/ shadow layer)
+"""
+def dolanWithCircPads(start = (0,0), end = (10,0), fingerWidth = 0.15, gap = 0.22, lineWidth = 2., taperLength = 2., fingerLength = 0.5, shadowWidth = 0.2, padRadius = 2, layerMetal = 0, layerShadow = 1):
+    # a few definitions
+    d = np.abs(end[0] - start[0]) # total width of junction region
+    taperStartX = end[0]-d/2.-taperLength/2.+gap+fingerLength+taperLength # x location where rectangle starts taper
+
+    # make lines
+    rect1 = gdspy.Rectangle([start[0], start[1]-lineWidth/2.], [start[0]+d/2.-taperLength/2., start[1]+lineWidth/2.])
+    rect2 = gdspy.Rectangle([end[0], end[1]-lineWidth/2.], [taperStartX, end[1]+lineWidth/2.])
+    dolan = gdspy.boolean(rect1, rect2, 'or')
+
+    # add taper
+    taper = gdspy.Polygon([[taperStartX, end[1]-lineWidth/2.], [taperStartX, end[1]+lineWidth/2.], [taperStartX-taperLength, end[1]+fingerWidth/2.], [taperStartX-taperLength, end[1]-fingerWidth/2.]])
+    dolan = gdspy.boolean(dolan, taper, 'or')
+
+    # add finger
+    finger = gdspy.Rectangle([taperStartX-taperLength, end[1]-fingerWidth/2.], [taperStartX-taperLength-fingerLength, end[1]+fingerWidth/2.])
+    dolan = gdspy.boolean(dolan, finger, 'or', layer = layerMetal)
+
+    # make junction shadow
+    jxnShadow = gdspy.offset(dolan, shadowWidth)
+
+    # extend shadow for gap
+    # note that if shadowWidth > gap, the shadow at the gap will be larger than the gap
+    gapShadow = gdspy.Rectangle([start[0]+d/2.-taperLength/2., start[1]+lineWidth/2.+shadowWidth], [start[0]+d/2.-taperLength/2.+gap, start[1]-lineWidth/2.-shadowWidth])
+    jxnShadow = gdspy.boolean(jxnShadow, gapShadow, 'or')
+
+    ## [HM] removing overlap of junction and undercut layers area to avoid double-exposure in ebeam
+    jxnShadow = gdspy.boolean(jxnShadow, dolan, 'not', layer=layerShadow)
+
+    # make pads
+    jxnpad1 = gdspy.Round(start, padRadius)
+    jxnpad2 = gdspy.Round(end, padRadius)
+    jxnPads = gdspy.boolean(jxnpad1, jxnpad2, 'or', layer = layerMetal)
+    
+    ## [RJC] make pad shadow
+    padShadow = gdspy.offset(jxnPads, shadowWidth)
+    
+    ## [RJC] remove pad shadow overlap with THRU layer to prevent double-exposure
+    padShadow = gdspy.boolean(padShadow, jxnPads, 'not', layer=layerShadow)
+
+    #Clean up overlaps between the junction shadow and the pads
+    jxnShadow = gdspy.boolean(jxnShadow, jxnPads, 'not', layer = layerShadow)
+
+    #Clean up overlaps between the pads shadow and the junction
+    padShadow = gdspy.boolean(padShadow, dolan, 'not', layer = layerShadow)
+
+    #Merge the junction shadow and jpad shadow into one feature
+    shadow = gdspy.boolean(jxnShadow, padShadow, 'or', layer = layerShadow)
+
+    #Merge the junction and jpads into one feature
+    dolan = gdspy.boolean(dolan, jxnPads, 'or', layer = layerMetal)
+
+    return dolan, shadow
+
 
 """
 Manhattan junction and undercut
